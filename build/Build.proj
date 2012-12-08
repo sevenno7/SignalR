@@ -13,7 +13,9 @@
     <NuGetExePath>$(NuGetToolsPath)\nuget.exe</NuGetExePath>
     <ToolsPath>$(ProjectRoot)\tools\</ToolsPath>
     <XunitPath>$(ToolsPath)xunit\</XunitPath>
-    <ChutzpahExePath>$(ProjectRoot)\tools\chutzpah\chutzpah.console.exe</ChutzpahExePath>
+    <ChutzpahExe>chutzpah.console.exe</ChutzpahExe>
+    <ChutzpahPath>$(ProjectRoot)\tools\chutzpah</ChutzpahPath>
+    <ChutzpahExePath>$(ChutzpahPath)\$(ChutzpahExe)</ChutzpahExePath>
     <JSTestsBridgeFile>$(ProjectRoot)\tests\Microsoft.AspNet.SignalR.Client.JS.Tests\CommandLineBridge.js</JSTestsBridgeFile>
     <DocuExePath>$(ToolsPath)docu\docu.exe</DocuExePath>
     <ZipExe>$(ToolsPath)7za920\7za.exe</ZipExe>
@@ -83,32 +85,10 @@
 
   <Target Name="BuildCmd" DependsOnTargets="RunUnitTests;">
   </Target>
-
-  <UsingTask TaskName="StartIISExpress" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
-
-    <Task>
-      <Reference Include="$(ArtifactsDir)\Microsoft.AspNet.SignalR.FunctionalTests\bin\Microsoft.AspNet.SignalR.FunctionalTests.dll" />
-      <Using Namespace="Microsoft.AspNet.SignalR.FunctionalTests.Infrastructure" />
-
-      <Using Namespace="System.IO" />
-
-      <Code Type="Fragment" Language="cs">
-        <![CDATA[                      
-              var path = Path.Combine(Directory.GetCurrentDirectory(), "..", "tests", "Microsoft.AspNet.SignalR.FunctionalTests","artifacts","Debug");
-              Log.LogMessage(path);
-              var iisExpressTestHost = new IISExpressTestHost(path);
-              /*
-                var siteManager = new SiteManager(Path.Combine(Directory.GetCurrentDirectory(), "..", "tests", "Microsoft.AspNet.SignalR.FunctionalTests", "config"));
-                
-                siteManager.GetSiteUrl();*/
-            ]]>
-      </Code>
-    </Task>
-  </UsingTask>
-
+  
   <Target Name="RunUnitTests">
-    <StartIISExpress />
-    <!--
+    <Exec Command="powershell -ExecutionPolicy Bypass $(ChutzpahPath)\StartIIS.ps1" />
+    <!--    
     <Exec Command="$(ChutzpahExePath) $(JSTestsBridgeFile) /silent" />
     <RemoveDir Directories="$(ProjectRoot)\tests\Microsoft.AspNet.SignalR.Client.JS.Tests\temp" ContinueOnError="true"></RemoveDir>
     <Delete Files="$(ProjectRoot)\tests\Microsoft.AspNet.SignalR.Client.JS.Tests\CommandLineBridge.js" ContinueOnError="true"></Delete>
